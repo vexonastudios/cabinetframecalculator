@@ -18,7 +18,16 @@ export default function App() {
   const [batchList, setBatchList] = useState(() => {
     try {
       const saved = localStorage.getItem('woodcraft_master_batch_list');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map(frame => ({
+        ...frame,
+        items: Array.isArray(frame?.items) ? frame.items.map(item => ({
+          ...item,
+          length: Number(item.length) || parseFraction(item.lengthFraction) || 0
+        })) : []
+      }));
     } catch {
       return [];
     }
@@ -44,18 +53,23 @@ export default function App() {
     
     const allCuts = [];
     batchList.forEach(frame => {
-      frame.items.forEach(item => {
-        allCuts.push({
-          id: item.id,
-          type: item.type,
-          name: item.name,
-          quantity: item.quantity,
-          length: item.length,
-          lengthFraction: item.lengthFraction,
-          widthFraction: item.widthFraction,
-          notes: item.notes
+      if (Array.isArray(frame?.items)) {
+        frame.items.forEach(item => {
+          const itemLen = Number(item.length) || parseFraction(item.lengthFraction) || 0;
+          if (itemLen > 0) {
+            allCuts.push({
+              id: item.id,
+              type: item.type,
+              name: item.name,
+              quantity: Number(item.quantity) || 1,
+              length: itemLen,
+              lengthFraction: item.lengthFraction,
+              widthFraction: item.widthFraction,
+              notes: item.notes
+            });
+          }
         });
-      });
+      }
     });
 
     return optimizeLumberStock({

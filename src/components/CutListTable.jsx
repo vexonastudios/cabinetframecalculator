@@ -19,6 +19,14 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleAddBatch = () => {
+    if (onAddToMasterList) {
+      onAddToMasterList(calcResult);
+      setAddedSuccess(true);
+      setTimeout(() => setAddedSuccess(false), 2000);
+    }
+  };
+
   const toggleCheckCut = (id) => {
     setCheckedCuts(prev => ({
       ...prev,

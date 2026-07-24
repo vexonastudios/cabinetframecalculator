@@ -241,20 +241,26 @@ export function calculateCabinetFrame(params = {}) {
 export function optimizeLumberStock({ cutList, stockLength = 96, sawKerf = 0.125, fractionPrecision = 16 }) {
   // Expand individual piece cuts
   const pieces = [];
-  cutList.forEach(item => {
-    for (let i = 0; i < item.quantity; i++) {
-      pieces.push({
-        id: `${item.id}-${i + 1}`,
-        name: item.name,
-        length: item.length,
-        lengthFraction: item.lengthFraction,
-        type: item.type
-      });
-    }
-  });
+  if (Array.isArray(cutList)) {
+    cutList.forEach(item => {
+      const qty = Math.max(1, Number(item.quantity) || 1);
+      const len = Math.max(0, Number(item.length) || parseFraction(item.lengthFraction) || 0);
+      if (len > 0) {
+        for (let i = 0; i < qty; i++) {
+          pieces.push({
+            id: `${item.id || 'part'}-${i + 1}`,
+            name: item.name || 'Cut Piece',
+            length: len,
+            lengthFraction: item.lengthFraction || formatFraction(len),
+            type: item.type || 'PART'
+          });
+        }
+      }
+    });
+  }
 
   // Sort by length descending
-  pieces.sort((a, b) => b.length - a.length);
+  pieces.sort((a, b) => (b.length || 0) - (a.length || 0));
 
   const boards = [];
 
@@ -279,7 +285,7 @@ export function optimizeLumberStock({ cutList, stockLength = 96, sawKerf = 0.125
         boardIndex: boards.length + 1,
         stockLength,
         stockLengthFraction: formatFraction(stockLength, fractionPrecision),
-        remainingLength: stockLength - piece.length,
+        remainingLength: Math.max(0, stockLength - (piece.length || 0)),
         cuts: [{
           ...piece,
           startPos: 0
