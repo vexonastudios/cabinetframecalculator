@@ -121,36 +121,46 @@ export default function App() {
           </div>
         </div>
 
-        {/* Workspace Layout: 2 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Workspace Layout: Flex on mobile, Grid on desktop */}
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 items-start">
           
-          {/* Left Column (Inputs & Project Manager) - 5 Columns */}
-          <div className="lg:col-span-5 space-y-6">
-            <InputPanel
-              params={frameParams}
-              onChange={setFrameParams}
-            />
+          {/* Left Column */}
+          <div className="contents lg:block lg:col-span-5 lg:space-y-6">
+            <div className="order-1 lg:order-none w-full">
+              <InputPanel
+                params={frameParams}
+                onChange={setFrameParams}
+              />
+            </div>
 
-            <ProjectManager
-              currentParams={frameParams}
-              onLoadParams={setFrameParams}
-            />
+            <div className="order-5 lg:order-none w-full">
+              <ProjectManager
+                currentParams={frameParams}
+                onLoadParams={setFrameParams}
+              />
+            </div>
           </div>
 
-          {/* Right Column (Visual Diagram, Cut List & Lumber Optimizer) - 7 Columns */}
-          <div className="lg:col-span-7 space-y-6">
-            <FrameDiagram
-              calcResult={calcResult}
-            />
+          {/* Right Column */}
+          <div className="contents lg:block lg:col-span-7 lg:space-y-6">
+            <div className="order-3 lg:order-none w-full">
+              <FrameDiagram
+                calcResult={calcResult}
+              />
+            </div>
 
-            <CutListTable
-              calcResult={calcResult}
-            />
+            <div className="order-2 lg:order-none w-full">
+              <CutListTable
+                calcResult={calcResult}
+              />
+            </div>
 
-            <LumberOptimizer
-              stockOptimization={calcResult.stockOptimization}
-              fractionPrecision={frameParams.fractionPrecision}
-            />
+            <div className="order-4 lg:order-none w-full">
+              <LumberOptimizer
+                stockOptimization={calcResult.stockOptimization}
+                fractionPrecision={frameParams.fractionPrecision}
+              />
+            </div>
           </div>
 
         </div>
