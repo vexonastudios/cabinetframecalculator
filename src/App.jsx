@@ -5,6 +5,7 @@ import FrameDiagram from './components/FrameDiagram';
 import CutListTable from './components/CutListTable';
 import LumberOptimizer from './components/LumberOptimizer';
 import ProjectManager from './components/ProjectManager';
+import MasterBatchList from './components/MasterBatchList';
 import { DEFAULT_FRAME_PARAMS, calculateCabinetFrame } from './utils/cabinetMath';
 import { formatFraction } from './utils/fractionUtils';
 import { Hammer, CheckCircle2, ShieldCheck, Ruler } from 'lucide-react';
@@ -12,6 +13,25 @@ import { Hammer, CheckCircle2, ShieldCheck, Ruler } from 'lucide-react';
 export default function App() {
   const [frameParams, setFrameParams] = useState(DEFAULT_FRAME_PARAMS);
   const [activePreset, setActivePreset] = useState(null);
+
+  // Master Cut List state for batching multiple cabinet frames
+  const [batchList, setBatchList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('woodcraft_master_batch_list');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveBatchToStorage = (newList) => {
+    setBatchList(newList);
+    try {
+      localStorage.setItem('woodcraft_master_batch_list', JSON.stringify(newList));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Compute face frame cuts live
   const calcResult = useMemo(() => {
@@ -33,6 +53,52 @@ export default function App() {
   const handleReset = () => {
     setFrameParams(DEFAULT_FRAME_PARAMS);
     setActivePreset(null);
+  };
+
+  const handleAddToMasterList = (calcResult) => {
+    if (!calcResult) return;
+    const newFrameBatch = {
+      id: Date.now().toString(),
+      title: `Frame ${formatFraction(frameParams.openingWidth)} × ${formatFraction(frameParams.openingHeight)}`,
+      openingWidth: frameParams.openingWidth,
+      openingHeight: frameParams.openingHeight,
+      items: calcResult.cutList.map((item, idx) => ({
+        id: `${item.id}_${idx}`,
+        name: item.name,
+        type: item.type,
+        quantity: item.quantity,
+        length: item.length,
+        lengthFraction: item.lengthFraction,
+        lengthDecimal: item.lengthDecimal,
+        widthFraction: item.widthFraction,
+        notes: item.notes,
+        checked: false
+      }))
+    };
+
+    saveBatchToStorage([...batchList, newFrameBatch]);
+  };
+
+  const handleToggleCheckItem = (frameId, itemId) => {
+    const updated = batchList.map(frame => {
+      if (frame.id !== frameId) return frame;
+      return {
+        ...frame,
+        items: frame.items.map(item => {
+          if (item.id !== itemId) return item;
+          return { ...item, checked: !item.checked };
+        })
+      };
+    });
+    saveBatchToStorage(updated);
+  };
+
+  const handleRemoveFrame = (frameId) => {
+    saveBatchToStorage(batchList.filter(f => f.id !== frameId));
+  };
+
+  const handleClearBatch = () => {
+    saveBatchToStorage([]);
   };
 
   const handlePrint = () => {
@@ -143,19 +209,29 @@ export default function App() {
 
           {/* Right Column */}
           <div className="contents lg:block lg:col-span-7 lg:space-y-6">
+            <div className="order-2 lg:order-none w-full">
+              <CutListTable
+                calcResult={calcResult}
+                onAddToMasterList={handleAddToMasterList}
+              />
+            </div>
+
             <div className="order-3 lg:order-none w-full">
+              <MasterBatchList
+                batchList={batchList}
+                onToggleCheckItem={handleToggleCheckItem}
+                onRemoveFrame={handleRemoveFrame}
+                onClearBatch={handleClearBatch}
+              />
+            </div>
+
+            <div className="order-4 lg:order-none w-full">
               <FrameDiagram
                 calcResult={calcResult}
               />
             </div>
 
-            <div className="order-2 lg:order-none w-full">
-              <CutListTable
-                calcResult={calcResult}
-              />
-            </div>
-
-            <div className="order-4 lg:order-none w-full">
+            <div className="order-5 lg:order-none w-full">
               <LumberOptimizer
                 stockOptimization={calcResult.stockOptimization}
                 fractionPrecision={frameParams.fractionPrecision}

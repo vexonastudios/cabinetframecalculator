@@ -2,8 +2,9 @@ import React from 'react';
 import { ListChecks, Copy, Check, Scissors } from 'lucide-react';
 import { formatFraction } from '../utils/fractionUtils';
 
-export default function CutListTable({ calcResult }) {
+export default function CutListTable({ calcResult, onAddToMasterList }) {
   const [copiedId, setCopiedId] = React.useState(null);
+  const [addedSuccess, setAddedSuccess] = React.useState(false);
 
   if (!calcResult) return null;
 
@@ -15,6 +16,14 @@ export default function CutListTable({ calcResult }) {
     navigator.clipboard.writeText(text);
     setCopiedId(item.id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleAddBatch = () => {
+    if (onAddToMasterList) {
+      onAddToMasterList(calcResult);
+      setAddedSuccess(true);
+      setTimeout(() => setAddedSuccess(false), 2000);
+    }
   };
 
   const getBadgeStyle = (type) => {
@@ -54,12 +63,27 @@ export default function CutListTable({ calcResult }) {
           </div>
         </div>
 
-        {/* Outer dimensions badge */}
-        <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-2 rounded-xl border border-emerald-500/40 self-start sm:self-auto shadow-inner">
-          <span className="text-xs text-slate-400 font-semibold">Frame Size:</span>
-          <span className="text-sm font-mono font-black text-emerald-400">
-            {outerWidthFraction} W × {outerHeightFraction} H
-          </span>
+        {/* Outer dimensions badge & Check Button */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-2 rounded-xl border border-emerald-500/40 shadow-inner">
+            <span className="text-xs text-slate-400 font-semibold">Frame:</span>
+            <span className="text-sm font-mono font-black text-emerald-400">
+              {outerWidthFraction} × {outerHeightFraction}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddBatch}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg transition-all transform active:scale-95 border ${
+              addedSuccess
+                ? 'bg-emerald-500 text-slate-950 border-emerald-400 scale-105'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 border-emerald-400'
+            }`}
+          >
+            <Check className="w-4 h-4 stroke-[3]" />
+            {addedSuccess ? 'ADDED TO JOB LIST!' : 'CHECK & SAVE CUTS'}
+          </button>
         </div>
       </div>
 
