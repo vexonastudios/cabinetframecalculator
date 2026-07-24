@@ -6,7 +6,7 @@ import CutListTable from './components/CutListTable';
 import LumberOptimizer from './components/LumberOptimizer';
 import ProjectManager from './components/ProjectManager';
 import MasterBatchList from './components/MasterBatchList';
-import { DEFAULT_FRAME_PARAMS, calculateCabinetFrame } from './utils/cabinetMath';
+import { DEFAULT_FRAME_PARAMS, calculateCabinetFrame, optimizeLumberStock } from './utils/cabinetMath';
 import { formatFraction } from './utils/fractionUtils';
 import { Hammer, CheckCircle2, ShieldCheck, Ruler } from 'lucide-react';
 
@@ -37,6 +37,36 @@ export default function App() {
   const calcResult = useMemo(() => {
     return calculateCabinetFrame(frameParams);
   }, [frameParams]);
+
+  // Compute 8ft board optimization for Master Batch List if items exist
+  const combinedBatchOptimization = useMemo(() => {
+    if (!batchList || batchList.length === 0) return null;
+    
+    const allCuts = [];
+    batchList.forEach(frame => {
+      frame.items.forEach(item => {
+        allCuts.push({
+          id: item.id,
+          type: item.type,
+          name: item.name,
+          quantity: item.quantity,
+          length: item.length,
+          lengthFraction: item.lengthFraction,
+          widthFraction: item.widthFraction,
+          notes: item.notes
+        });
+      });
+    });
+
+    return optimizeLumberStock({
+      cutList: allCuts,
+      stockLength: frameParams.stockBoardLength || 96,
+      sawKerf: frameParams.sawKerf || 0.125,
+      fractionPrecision: frameParams.fractionPrecision || 16
+    });
+  }, [batchList, frameParams.stockBoardLength, frameParams.sawKerf, frameParams.fractionPrecision]);
+
+  const activeStockOptimization = combinedBatchOptimization || calcResult.stockOptimization;
 
   const handleSelectPreset = (preset) => {
     setActivePreset(preset.id);
@@ -233,8 +263,9 @@ export default function App() {
 
             <div className="order-5 lg:order-none w-full">
               <LumberOptimizer
-                stockOptimization={calcResult.stockOptimization}
-                fractionPrecision={frameParams.fractionPrecision}
+                stockOptimization={activeStockOptimization}
+                stockBoardLength={frameParams.stockBoardLength}
+                onStockLengthChange={(len) => setFrameParams(p => ({ ...p, stockBoardLength: len }))}
               />
             </div>
           </div>

@@ -238,7 +238,7 @@ export function calculateCabinetFrame(params = {}) {
 /**
  * Lumber Stock Optimizer using First Fit Decreasing algorithm
  */
-function optimizeLumberStock({ cutList, stockLength = 96, sawKerf = 0.125, fractionPrecision = 16 }) {
+export function optimizeLumberStock({ cutList, stockLength = 96, sawKerf = 0.125, fractionPrecision = 16 }) {
   // Expand individual piece cuts
   const pieces = [];
   cutList.forEach(item => {
