@@ -1,4 +1,4 @@
-import { formatFraction, formatDecimal } from './fractionUtils';
+import { formatFraction, formatDecimal, parseFraction } from './fractionUtils';
 
 /**
  * Cabinet Face Frame Math & Cut List Calculator Engine
@@ -28,14 +28,14 @@ export const DEFAULT_FRAME_PARAMS = {
 export function calculateCabinetFrame(params = {}) {
   const config = { ...DEFAULT_FRAME_PARAMS, ...params };
 
-  const opW = Number(config.openingWidth) || 0;
-  const opH = Number(config.openingHeight) || 0;
-  const ovL = Number(config.overlayLeft) || 0;
-  const ovR = Number(config.overlayRight) || 0;
-  const ovT = Number(config.overlayTop) || 0;
-  const ovB = Number(config.overlayBottom) || 0;
-  const matW = Number(config.materialWidth) || 2.5;
-  const matT = Number(config.materialThickness) || 0.75;
+  const opW = parseFraction(config.openingWidth) || 0;
+  const opH = parseFraction(config.openingHeight) || 0;
+  const ovL = parseFraction(config.overlayLeft) || 0;
+  const ovR = parseFraction(config.overlayRight) || 0;
+  const ovT = parseFraction(config.overlayTop) || 0;
+  const ovB = parseFraction(config.overlayBottom) || 0;
+  const matW = parseFraction(config.materialWidth) || 2.5;
+  const matT = parseFraction(config.materialThickness) || 0.75;
   const vOpenings = Math.max(1, parseInt(config.verticalOpenings, 10) || 1);
   const hOpenings = Math.max(1, parseInt(config.horizontalOpenings, 10) || 1);
   const prec = config.fractionPrecision || 16;
