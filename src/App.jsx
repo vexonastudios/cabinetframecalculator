@@ -6,13 +6,39 @@ import CutListTable from './components/CutListTable';
 import LumberOptimizer from './components/LumberOptimizer';
 import ProjectManager from './components/ProjectManager';
 import MasterBatchList from './components/MasterBatchList';
+import SettingsModal from './components/SettingsModal';
 import { DEFAULT_FRAME_PARAMS, calculateCabinetFrame, optimizeLumberStock } from './utils/cabinetMath';
 import { formatFraction } from './utils/fractionUtils';
-import { Hammer, CheckCircle2, ShieldCheck, Ruler } from 'lucide-react';
+import { Hammer, CheckCircle2, ShieldCheck, Ruler, Scissors, Layers, Layout, BookOpen } from 'lucide-react';
 
 export default function App() {
-  const [frameParams, setFrameParams] = useState(DEFAULT_FRAME_PARAMS);
+  const [shopSettings, setShopSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('woodcraft_shop_settings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      materialWidth: 2.5,
+      sawKerf: 0.125,
+      jointStyle: 'CONTINUOUS_RAILS',
+      costPerBoard: 0,
+      fractionPrecision: 16
+    };
+  });
+
+  const [frameParams, setFrameParams] = useState({
+    ...DEFAULT_FRAME_PARAMS,
+    materialWidth: shopSettings.materialWidth,
+    sawKerf: shopSettings.sawKerf,
+    jointStyle: shopSettings.jointStyle,
+    fractionPrecision: shopSettings.fractionPrecision
+  });
+  
   const [activePreset, setActivePreset] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // UI Flow State
+  const [activeTab, setActiveTab] = useState('cutlist'); // 'cutlist', 'diagram', 'lumber', 'joblist'
 
   // Master Cut List state for batching multiple cabinet frames
   const [batchList, setBatchList] = useState(() => {
@@ -145,6 +171,22 @@ export default function App() {
     saveBatchToStorage([]);
   };
 
+  const handleSaveSettings = (newSettings) => {
+    setShopSettings(newSettings);
+    try {
+      localStorage.setItem('woodcraft_shop_settings', JSON.stringify(newSettings));
+    } catch (e) {}
+    
+    // Also update current frame params if they changed
+    setFrameParams(prev => ({
+      ...prev,
+      materialWidth: newSettings.materialWidth,
+      sawKerf: newSettings.sawKerf,
+      jointStyle: newSettings.jointStyle,
+      fractionPrecision: newSettings.fractionPrecision
+    }));
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -194,39 +236,40 @@ export default function App() {
         onExportCSV={handleExportCSV}
         onSelectPreset={handleSelectPreset}
         activePreset={activePreset}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {/* Main Workbench Workspace */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
-        {/* Top Highlight Summary Banner */}
-        <div className="bg-gradient-to-r from-amber-900/30 via-slate-900 to-orange-950/30 border border-amber-500/20 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
-              <Ruler className="w-6 h-6 stroke-[2.5]" />
+        {/* Top Highlight Summary Banner - Simplified */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">
+              <Ruler className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-white font-display">
-                Frame Outer Dimensions: <span className="text-amber-400">{calcResult.outerWidthFraction} W</span> × <span className="text-amber-400">{calcResult.outerHeightFraction} H</span>
+              <h2 className="text-sm font-bold text-white font-display">
+                Frame Size: <span className="text-amber-400">{calcResult.outerWidthFraction} W</span> × <span className="text-amber-400">{calcResult.outerHeightFraction} H</span>
               </h2>
-              <p className="text-xs text-slate-300 mt-0.5">
-                {frameParams.jointStyle === 'CONTINUOUS_RAILS' ? (
-                  <>Top & Bottom boards run continuous (<strong className="text-amber-300">{calcResult.outerWidthFraction}</strong>). Vertical stiles cut at <strong className="text-sky-300">{calcResult.cutList.find(c => c.id === 'outer-stiles')?.lengthFraction}</strong> (-5" deduction).</>
-                ) : (
-                  <>Vertical stiles run continuous (<strong className="text-sky-300">{calcResult.outerHeightFraction}</strong>). Top & Bottom rails cut at <strong className="text-amber-300">{calcResult.cutList.find(c => c.id === 'top-rail')?.lengthFraction}</strong>.</>
-                )}
+              <p className="text-xs text-slate-400 mt-0.5">
+                {frameParams.jointStyle === 'CONTINUOUS_RAILS' 
+                  ? `Top/Bottom continuous. Stiles cut at ${calcResult.cutList.find(c => c.id === 'outer-stiles')?.lengthFraction}.`
+                  : `Stiles continuous. Top/Bottom cut at ${calcResult.cutList.find(c => c.id === 'top-rail')?.lengthFraction}.`
+                }
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 self-end md:self-auto font-mono text-xs">
-            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-              <span className="text-slate-400 block text-[10px]">Opening Size</span>
-              <span className="text-white font-bold">{formatFraction(frameParams.openingWidth)} × {formatFraction(frameParams.openingHeight)}</span>
+          <div className="flex items-center gap-3 font-mono text-xs">
+            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+              <span className="text-slate-500 mr-2">Opening:</span>
+              <span className="font-bold text-white">
+                {frameParams.openingWidth ? formatFraction(frameParams.openingWidth) : '--'} × {frameParams.openingHeight ? formatFraction(frameParams.openingHeight) : '--'}
+              </span>
             </div>
-            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-              <span className="text-slate-400 block text-[10px]">Material Width</span>
-              <span className="text-emerald-400 font-bold">{formatFraction(frameParams.materialWidth)}</span>
+            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+              <span className="text-slate-500 mr-2">Mat Width:</span>
+              <span className="font-bold text-white">{formatFraction(frameParams.materialWidth)}</span>
             </div>
           </div>
         </div>
@@ -251,37 +294,88 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="contents lg:block lg:col-span-7 lg:space-y-6">
-            <div className="order-2 lg:order-none w-full">
-              <CutListTable
-                calcResult={calcResult}
-                onAddToMasterList={handleAddToMasterList}
-              />
+          {/* Right Column (Tabbed Outputs) */}
+          <div className="contents lg:block lg:col-span-7 space-y-4">
+            
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-xl">
+              <button
+                onClick={() => setActiveTab('cutlist')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                  activeTab === 'cutlist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Scissors className="w-4 h-4" />
+                Cut List
+              </button>
+              <button
+                onClick={() => setActiveTab('diagram')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                  activeTab === 'diagram' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Layout className="w-4 h-4" />
+                Diagram
+              </button>
+              <button
+                onClick={() => setActiveTab('lumber')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                  activeTab === 'lumber' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                Lumber Map
+              </button>
+              <button
+                onClick={() => setActiveTab('joblist')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                  activeTab === 'joblist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Job List
+                {batchList.length > 0 && (
+                  <span className="bg-amber-500 text-slate-900 px-1.5 py-0.5 rounded-full text-[10px] ml-1">
+                    {batchList.length}
+                  </span>
+                )}
+              </button>
             </div>
 
-            <div className="order-3 lg:order-none w-full">
-              <MasterBatchList
-                batchList={batchList}
-                onToggleCheckItem={handleToggleCheckItem}
-                onRemoveFrame={handleRemoveFrame}
-                onClearBatch={handleClearBatch}
-              />
+            {/* Tab Content */}
+            <div className="pt-2">
+              <div className={`${activeTab === 'cutlist' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                <CutListTable
+                  calcResult={calcResult}
+                  onAddToMasterList={handleAddToMasterList}
+                />
+              </div>
+
+              <div className={`${activeTab === 'diagram' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                <FrameDiagram
+                  calcResult={calcResult}
+                />
+              </div>
+
+              <div className={`${activeTab === 'lumber' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                <LumberOptimizer
+                  stockOptimization={activeStockOptimization}
+                  stockBoardLength={frameParams.stockBoardLength}
+                  onStockLengthChange={(len) => setFrameParams(p => ({ ...p, stockBoardLength: len }))}
+                  costPerBoard={shopSettings.costPerBoard}
+                />
+              </div>
+
+              <div className={`${activeTab === 'joblist' ? 'block' : 'hidden'}`}>
+                <MasterBatchList
+                  batchList={batchList}
+                  onToggleCheckItem={handleToggleCheckItem}
+                  onRemoveFrame={handleRemoveFrame}
+                  onClearBatch={handleClearBatch}
+                />
+              </div>
             </div>
 
-            <div className="order-4 lg:order-none w-full">
-              <FrameDiagram
-                calcResult={calcResult}
-              />
-            </div>
-
-            <div className="order-5 lg:order-none w-full">
-              <LumberOptimizer
-                stockOptimization={activeStockOptimization}
-                stockBoardLength={frameParams.stockBoardLength}
-                onStockLengthChange={(len) => setFrameParams(p => ({ ...p, stockBoardLength: len }))}
-              />
-            </div>
           </div>
 
         </div>
@@ -294,6 +388,13 @@ export default function App() {
           Woodcraft FrameCut Pro — Precision Cabinet Face Frame & Stile/Rail Cut Calculator
         </div>
       </footer>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentSettings={shopSettings}
+        onSaveSettings={handleSaveSettings}
+      />
 
     </div>
   );

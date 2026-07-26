@@ -6,8 +6,8 @@ import { formatFraction, formatDecimal, parseFraction } from './fractionUtils';
 
 export const DEFAULT_FRAME_PARAMS = {
   name: 'Standard Face Frame',
-  openingWidth: 14.5,      // 14 1/2 inches opening
-  openingHeight: 30.0,     // 30 inches opening
+  openingWidth: '',        // Default blank so user can type immediately
+  openingHeight: '',       // Default blank so user can type immediately
   overlayLeft: 1.0,        // 1 inch overlap left
   overlayRight: 1.0,       // 1 inch overlap right
   overlayTop: 1.0,         // 1 inch overlap top
@@ -19,7 +19,13 @@ export const DEFAULT_FRAME_PARAMS = {
   horizontalOpenings: 1,   // 1 = single opening, 2 = drawer over door
   stockBoardLength: 96,    // 8 ft (96 inches)
   sawKerf: 0.125,          // 1/8 inch saw blade kerf
-  fractionPrecision: 16    // 1/16th inch
+  fractionPrecision: 16,   // 1/16th inch
+  
+  // Door Settings
+  calculateDoors: false,
+  doorStyle: 'OVERLAY',    // 'OVERLAY' or 'INSET'
+  doorOverlay: 0.5,        // 1/2 inch overlay
+  doorInsetReveal: 0.09375 // 3/32 inch gap
 };
 
 /**
@@ -212,6 +218,39 @@ export function calculateCabinetFrame(params = {}) {
   const totalLinearInches = formattedCutList.reduce((sum, item) => sum + item.totalLinearInches, 0);
   const totalLinearFeet = totalLinearInches / 12;
 
+  // 3. Door & Drawer Sizing
+  let doorList = [];
+  if (config.calculateDoors) {
+    const dOverlay = Number(config.doorOverlay) || 0;
+    const dReveal = Number(config.doorInsetReveal) || 0;
+    const dStyle = config.doorStyle;
+
+    // Calculate exact inner opening size per section
+    const openingW = (opW - ((vOpenings - 1) * matW)) / vOpenings;
+    const openingH = (opH - ((hOpenings - 1) * matW)) / hOpenings;
+
+    let doorW = openingW;
+    let doorH = openingH;
+
+    if (dStyle === 'OVERLAY') {
+      doorW += (dOverlay * 2);
+      doorH += (dOverlay * 2);
+    } else if (dStyle === 'INSET') {
+      doorW -= (dReveal * 2);
+      doorH -= (dReveal * 2);
+    }
+
+    doorList.push({
+      id: 'door-front',
+      name: dStyle === 'OVERLAY' ? `Overlay Door/Drawer Front (${formatFraction(dOverlay)} over)` : `Inset Door/Drawer Front (${formatFraction(dReveal)} gap)`,
+      quantity: vOpenings * hOpenings,
+      width: doorW,
+      widthFraction: formatFraction(doorW, prec),
+      height: doorH,
+      heightFraction: formatFraction(doorH, prec)
+    });
+  }
+
   // 3. Stock Board Nesting & Lumber Optimizer
   const stockOptimization = optimizeLumberStock({
     cutList: formattedCutList,
@@ -229,6 +268,7 @@ export function calculateCabinetFrame(params = {}) {
     totalOverlayX,
     totalOverlayY,
     cutList: formattedCutList,
+    doorList,
     totalLinearInches,
     totalLinearFeet: formatDecimal(totalLinearFeet, 2),
     stockOptimization

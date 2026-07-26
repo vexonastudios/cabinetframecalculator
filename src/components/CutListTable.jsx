@@ -9,7 +9,7 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
 
   if (!calcResult) return null;
 
-  const { cutList, outerWidthFraction, outerHeightFraction, totalLinearFeet, stockOptimization, config } = calcResult;
+  const { cutList, doorList, outerWidthFraction, outerHeightFraction, totalLinearFeet, stockOptimization, config } = calcResult;
   const prec = config.fractionPrecision || 16;
 
   const handleCopyText = (item) => {
@@ -52,7 +52,7 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
   };
 
   return (
-    <div className="bg-slate-900 border-2 border-emerald-500/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-emerald-950/60 ring-1 ring-emerald-500/30 space-y-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
       
       {/* High-Visibility Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-emerald-500/30 pb-3.5 gap-3">
@@ -100,7 +100,7 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
       </div>
 
       {/* Live Cut Progress Bar */}
-      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-300">Progress:</span>
           <span className="text-xs font-mono font-black text-emerald-400">
@@ -129,7 +129,7 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-emerald-500/20 bg-slate-900/90 text-[11px] font-bold text-slate-300 uppercase tracking-wider">
@@ -226,6 +226,40 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
               );
             })}
           </tbody>
+
+          {doorList && doorList.length > 0 && (
+            <>
+              <thead>
+                <tr className="border-b border-indigo-500/20 bg-indigo-900/40 text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
+                  <th colSpan="8" className="py-2.5 px-4">Doors & Drawer Fronts</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/80 text-xs font-medium text-slate-200">
+                {doorList.map((item) => (
+                  <tr key={item.id} className="hover:bg-indigo-950/30">
+                    <td className="py-3.5 px-4 text-center select-none">-</td>
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg font-mono font-black text-sm shadow bg-indigo-500 text-slate-950">
+                        {item.quantity}×
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex flex-col">
+                        <span className="font-extrabold text-sm text-white">{item.name}</span>
+                        <span className="text-[11px] text-slate-400 mt-0.5">Calculated Size</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 font-mono font-black text-base text-indigo-400">
+                      {item.widthFraction} W × {item.heightFraction} H
+                    </td>
+                    <td colSpan="4" className="py-3.5 px-4 text-slate-400 text-xs italic">
+                      Cut from sheet goods or join solid wood
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </>
+          )}
         </table>
       </div>
 
@@ -316,25 +350,52 @@ export default function CutListTable({ calcResult, onAddToMasterList }) {
             </div>
           );
         })}
+
+        {doorList && doorList.length > 0 && doorList.map((item) => (
+          <div key={item.id} className="rounded-xl border-2 border-indigo-500/60 border-l-8 border-l-indigo-500 bg-slate-950 p-4 shadow-lg space-y-3">
+            <div className="flex justify-between items-center gap-2">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg font-mono font-black text-sm shadow bg-indigo-500 text-slate-950">
+                  {item.quantity}×
+                </span>
+                <div>
+                  <span className="font-extrabold text-base block leading-tight text-white">{item.name}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="rounded-xl p-3.5 border bg-indigo-950/40 border-indigo-500/40">
+              <span className="text-[10px] uppercase font-black tracking-wider text-indigo-400 block mb-0.5">
+                FINISHED DOOR SIZE:
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono font-black text-xl tracking-tight text-indigo-400">
+                  {item.widthFraction} W × {item.heightFraction} H
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 italic">Cut from sheet goods or glue up solid wood panel.</p>
+          </div>
+        ))}
       </div>
 
       {/* Summary Footer Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-        <div className="bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30 flex flex-col justify-center items-center text-center shadow-inner">
+        <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-center items-center text-center">
           <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 mb-1">Total Pieces</span>
           <span className="text-lg font-mono font-black text-white">
             {cutList.reduce((sum, item) => sum + item.quantity, 0)}
           </span>
         </div>
 
-        <div className="bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30 flex flex-col justify-center items-center text-center shadow-inner">
+        <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-center items-center text-center">
           <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 mb-1">Linear Footage</span>
           <span className="text-lg font-mono font-black text-emerald-400">
             {totalLinearFeet} ft
           </span>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30 flex flex-col justify-center items-center text-center shadow-inner">
+        <div className="col-span-2 sm:col-span-1 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-center items-center text-center">
           <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 mb-1">Stock 8ft Boards</span>
           <span className="text-lg font-mono font-black text-emerald-400">
             {stockOptimization?.boardCount || 1}

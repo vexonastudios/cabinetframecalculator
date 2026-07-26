@@ -2,14 +2,15 @@ import React from 'react';
 import { Package, Percent, Scissors, Layers, CheckCircle2, ArrowRight } from 'lucide-react';
 import { formatFraction } from '../utils/fractionUtils';
 
-export default function LumberOptimizer({ stockOptimization, stockBoardLength = 96, onStockLengthChange }) {
+export default function LumberOptimizer({ stockOptimization, stockBoardLength = 96, onStockLengthChange, costPerBoard = 0 }) {
   if (!stockOptimization) return null;
 
   const { boardCount, stockLength, stockLengthFraction, boards, wasteFraction, wastePercentage } = stockOptimization;
   const yieldPercentage = (100 - parseFloat(wastePercentage || 0)).toFixed(1);
+  const totalCost = boardCount * costPerBoard;
 
   return (
-    <div className="bg-slate-900 border-2 border-emerald-500/70 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-emerald-500/30 pb-3.5 gap-3">
@@ -61,10 +62,14 @@ export default function LumberOptimizer({ stockOptimization, stockBoardLength = 
       </div>
 
       {/* Summary Yield Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Boards Needed</span>
-          <span className="text-lg font-mono font-black text-white">{boardCount} × 8ft Boards</span>
+          <span className="text-lg font-mono font-black text-white">{boardCount} × 8ft</span>
+        </div>
+        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Est. Cost</span>
+          <span className="text-lg font-mono font-black text-white">${totalCost.toFixed(2)}</span>
         </div>
         <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Lumber Used</span>
@@ -83,7 +88,7 @@ export default function LumberOptimizer({ stockOptimization, stockBoardLength = 
       {/* 8ft Board Visual Diagrams & Step-by-Step Cut Order */}
       <div className="space-y-4 pt-1">
         {boards.map((board) => (
-          <div key={board.boardIndex} className="bg-slate-950 p-4 rounded-xl border-2 border-slate-800 space-y-3">
+          <div key={board.boardIndex} className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
             
             {/* Board Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1 border-b border-slate-800/80 pb-2">

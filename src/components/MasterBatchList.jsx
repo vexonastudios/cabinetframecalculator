@@ -23,7 +23,7 @@ export default function MasterBatchList({ batchList, onToggleCheckItem, onRemove
   const progressPercent = totalPieces > 0 ? Math.round((completedPieces / totalPieces) * 100) : 0;
 
   return (
-    <div className="bg-slate-900 border-2 border-amber-500/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-amber-950/40 ring-1 ring-amber-500/30 space-y-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-amber-500/30 pb-3.5 gap-3">

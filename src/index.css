@@ -41,33 +41,63 @@
   background: #f59e0b;
 }
 
-/* Print Stylesheet for Cut Sheets */
+/* Print Stylesheet for Shop Blueprints */
 @media print {
-  body {
+  @page {
+    margin: 0.5in;
+    size: auto;
+  }
+  body, html {
     background: #ffffff !important;
     color: #000000 !important;
+    font-size: 11pt;
   }
-  header, button, input, select, .no-print {
+  header, footer, button, input, select, .no-print, nav {
     display: none !important;
   }
   .print-only {
     display: block !important;
   }
-  .bg-slate-900, .bg-slate-950, .bg-slate-800 {
+  /* Strip all dark backgrounds and borders */
+  div, span, p, td, th {
     background: transparent !important;
-    border-color: #cccccc !important;
     color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
-  text, text * {
+  /* Maintain specific structural borders for clarity */
+  .border, .border-2, .border-b, .border-t, .border-l, .border-r {
+    border-color: #000000 !important;
+  }
+  /* Diagrams */
+  svg text, svg text * {
     fill: #000000 !important;
+    stroke: none !important;
   }
+  svg path, svg line, svg rect {
+    stroke: #000000 !important;
+  }
+  /* Table formatting */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
   }
   th, td {
     border: 1px solid #000000 !important;
     color: #000000 !important;
-    padding: 8px !important;
+    padding: 6px !important;
+    font-size: 10pt;
+  }
+  /* specific layout tweaks */
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
   }
 }

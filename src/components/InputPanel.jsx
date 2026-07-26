@@ -29,7 +29,7 @@ export default function InputPanel({ params, onChange }) {
     params.overlayLeft === params.overlayTop;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-6">
+    <div className="bg-slate-900/80 rounded-2xl p-5 shadow-lg space-y-6">
       
       {/* Panel Section Title */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -52,14 +52,14 @@ export default function InputPanel({ params, onChange }) {
               Inner Opening Width
             </label>
             <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-              {formatFraction(parseFraction(params.openingWidth))}
+              {params.openingWidth ? formatFraction(parseFraction(params.openingWidth)) : '--'}
             </span>
           </div>
           
           <div className="flex gap-2">
             <input
               type="text"
-              value={params.openingWidth}
+              value={params.openingWidth ?? ''}
               onChange={(e) => handleChange('openingWidth', e.target.value)}
               placeholder="e.g. 14 1/2 or 14.5"
               className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
@@ -67,15 +67,15 @@ export default function InputPanel({ params, onChange }) {
           </div>
 
           {/* Quick Fraction Adjusters */}
-          <div className="flex items-center justify-between gap-1 pt-1">
-            <span className="text-[10px] uppercase font-semibold text-slate-400">Quick:</span>
-            <div className="flex gap-1">
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Quick Adjust:</span>
+            <div className="grid grid-cols-4 gap-1">
               {[-0.5, -0.125, 0.125, 0.5].map((delta) => (
                 <button
                   key={delta}
                   type="button"
                   onClick={() => handleFractionAdjust('openingWidth', delta)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95"
+                  className="px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center truncate"
                 >
                   {delta > 0 ? `+${formatFraction(delta)}` : formatFraction(delta)}
                 </button>
@@ -91,7 +91,7 @@ export default function InputPanel({ params, onChange }) {
               Inner Opening Height
             </label>
             <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-              {formatFraction(parseFraction(params.openingHeight))}
+              {params.openingHeight ? formatFraction(parseFraction(params.openingHeight)) : '--'}
             </span>
           </div>
 
@@ -106,15 +106,15 @@ export default function InputPanel({ params, onChange }) {
           </div>
 
           {/* Quick Fraction Adjusters */}
-          <div className="flex items-center justify-between gap-1 pt-1">
-            <span className="text-[10px] uppercase font-semibold text-slate-400">Quick:</span>
-            <div className="flex gap-1">
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Quick Adjust:</span>
+            <div className="grid grid-cols-4 gap-1">
               {[-0.5, -0.125, 0.125, 0.5].map((delta) => (
                 <button
                   key={delta}
                   type="button"
                   onClick={() => handleFractionAdjust('openingHeight', delta)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95"
+                  className="px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center truncate"
                 >
                   {delta > 0 ? `+${formatFraction(delta)}` : formatFraction(delta)}
                 </button>
@@ -126,84 +126,85 @@ export default function InputPanel({ params, onChange }) {
       </div>
 
       {/* 2. Side Overlap / Overlay Settings */}
-      <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Maximize2 className="w-4 h-4 text-orange-400" />
-              Side Overlap / Overlay (Extra Margin)
-            </label>
-            <p className="text-[11px] text-slate-400 mt-0.5">Adds margin outside opening edges (+2" total for 1" overlay on each side)</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-0">
-            {[0.5, 0.75, 1.0, 1.5].map((ov) => (
-              <button
-                key={ov}
-                type="button"
-                onClick={() => handleOverlayAll(ov)}
-                className={`px-3 py-2 rounded-lg text-sm font-mono font-bold transition-all border active:scale-95 ${
-                  isUniformOverlay && Number(params.overlayLeft) === ov
-                    ? 'bg-amber-500 text-slate-950 border-amber-400'
-                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                }`}
-              >
-                {formatFraction(ov)} / side
-              </button>
-            ))}
-          </div>
+      <div className="pt-2 border-t border-slate-800/60 space-y-3">
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Maximize2 className="w-4 h-4 text-orange-400" />
+            Side Overlap / Overlay (Extra Margin)
+          </label>
+          <p className="text-[11px] text-slate-400">Adds margin outside opening edges (+2" total for 1" overlay on each side)</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+        {/* Overlay Presets */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          {[0.5, 0.75, 1.0, 1.5].map((ov) => (
+            <button
+              key={ov}
+              type="button"
+              onClick={() => handleOverlayAll(ov)}
+              className={`px-2 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border text-center truncate active:scale-95 ${
+                isUniformOverlay && Number(params.overlayLeft) === ov
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow'
+                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+              }`}
+            >
+              {formatFraction(ov)}" / side
+            </button>
+          ))}
+        </div>
+
+        {/* Individual Overlays */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
           <div>
-            <span className="text-[10px] text-slate-400 font-medium">Left Overlay</span>
+            <span className="text-[10px] text-slate-400 font-semibold block mb-0.5">Left</span>
             <input
               type="text"
               value={params.overlayLeft}
               onChange={(e) => handleChange('overlayLeft', parseFraction(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
             />
           </div>
           <div>
-            <span className="text-[10px] text-slate-400 font-medium">Right Overlay</span>
+            <span className="text-[10px] text-slate-400 font-semibold block mb-0.5">Right</span>
             <input
               type="text"
               value={params.overlayRight}
               onChange={(e) => handleChange('overlayRight', parseFraction(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
             />
           </div>
           <div>
-            <span className="text-[10px] text-slate-400 font-medium">Top Overlay</span>
+            <span className="text-[10px] text-slate-400 font-semibold block mb-0.5">Top</span>
             <input
               type="text"
               value={params.overlayTop}
               onChange={(e) => handleChange('overlayTop', parseFraction(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
             />
           </div>
           <div>
-            <span className="text-[10px] text-slate-400 font-medium">Bottom Overlay</span>
+            <span className="text-[10px] text-slate-400 font-semibold block mb-0.5">Bottom</span>
             <input
               type="text"
               value={params.overlayBottom}
               onChange={(e) => handleChange('overlayBottom', parseFraction(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs focus:border-amber-500"
             />
           </div>
         </div>
       </div>
 
       {/* 3. Material Width & Joint Configuration */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800/60">
         
         {/* Frame Stock Material Width */}
-        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
               Stock Board Width
             </label>
             <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
-              {formatFraction(parseFraction(params.materialWidth))} (2.5")
+              {formatFraction(parseFraction(params.materialWidth))}
             </span>
           </div>
 
@@ -217,15 +218,15 @@ export default function InputPanel({ params, onChange }) {
             />
           </div>
 
-          <div className="flex items-center justify-between gap-2 mt-2 md:mt-0">
-            <span className="text-[10px] uppercase text-slate-400">Presets:</span>
-            <div className="flex flex-wrap gap-2">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Presets:</span>
+            <div className="grid grid-cols-4 gap-1">
               {[1.5, 2.0, 2.5, 3.0].map((mw) => (
                 <button
                   key={mw}
                   type="button"
                   onClick={() => handleChange('materialWidth', mw)}
-                  className={`px-3 py-2 rounded-lg text-sm font-mono font-bold border transition-all active:scale-95 ${
+                  className={`px-1 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all active:scale-95 text-center truncate ${
                     Number(params.materialWidth) === mw
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                       : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
@@ -239,7 +240,7 @@ export default function InputPanel({ params, onChange }) {
         </div>
 
         {/* Joint Orientation Selector */}
-        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div className="space-y-3">
           <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <ArrowRightLeft className="w-4 h-4 text-sky-400" />
             Joint Construction Rule
@@ -297,7 +298,7 @@ export default function InputPanel({ params, onChange }) {
       </div>
 
       {/* 4. Partitioning & Stock Lumber Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-800/60">
         
         {/* Door Bays */}
         <div>
@@ -347,6 +348,71 @@ export default function InputPanel({ params, onChange }) {
           </select>
         </div>
 
+      </div>
+
+      {/* 5. Door & Drawer Calculator */}
+      <div className={`p-4 rounded-xl transition-all space-y-3 border border-transparent ${
+        params.calculateDoors ? 'bg-indigo-950/30' : 'bg-transparent'
+      }`}>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!!params.calculateDoors}
+              onChange={(e) => handleChange('calculateDoors', e.target.checked)}
+              className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500"
+            />
+            <span className={params.calculateDoors ? 'text-indigo-400' : 'text-slate-400'}>
+              Calculate Doors & Drawer Fronts
+            </span>
+          </label>
+        </div>
+
+        {params.calculateDoors && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div>
+              <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                Door Style
+              </label>
+              <select
+                value={params.doorStyle || 'OVERLAY'}
+                onChange={(e) => handleChange('doorStyle', e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-semibold focus:border-indigo-500"
+              >
+                <option value="OVERLAY">Overlay (Overlaps frame)</option>
+                <option value="INSET">Inset (Inside frame)</option>
+              </select>
+            </div>
+
+            {params.doorStyle === 'INSET' ? (
+              <div>
+                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  Inset Reveal Gap (Per Side)
+                </label>
+                <input
+                  type="text"
+                  value={params.doorInsetReveal || 0.09375}
+                  onChange={(e) => handleChange('doorInsetReveal', parseFraction(e.target.value))}
+                  placeholder="e.g. 3/32"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-sm focus:border-indigo-500"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  Overlay Amount (Per Side)
+                </label>
+                <input
+                  type="text"
+                  value={params.doorOverlay || 0.5}
+                  onChange={(e) => handleChange('doorOverlay', parseFraction(e.target.value))}
+                  placeholder="e.g. 1/2"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-sm focus:border-indigo-500"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
     </div>
