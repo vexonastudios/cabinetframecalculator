@@ -69,13 +69,13 @@ export default function InputPanel({ params, onChange }) {
           {/* Quick Fraction Adjusters */}
           <div className="space-y-1.5 pt-1">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Quick Adjust:</span>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="flex flex-wrap gap-1">
               {[-0.5, -0.125, 0.125, 0.5].map((delta) => (
                 <button
                   key={delta}
                   type="button"
                   onClick={() => handleFractionAdjust('openingWidth', delta)}
-                  className="px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center truncate"
+                  className="flex-1 min-w-[3.5rem] px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center whitespace-nowrap"
                 >
                   {delta > 0 ? `+${formatFraction(delta)}` : formatFraction(delta)}
                 </button>
@@ -108,13 +108,13 @@ export default function InputPanel({ params, onChange }) {
           {/* Quick Fraction Adjusters */}
           <div className="space-y-1.5 pt-1">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Quick Adjust:</span>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="flex flex-wrap gap-1">
               {[-0.5, -0.125, 0.125, 0.5].map((delta) => (
                 <button
                   key={delta}
                   type="button"
                   onClick={() => handleFractionAdjust('openingHeight', delta)}
-                  className="px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center truncate"
+                  className="flex-1 min-w-[3.5rem] px-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold font-mono border border-slate-700 transition-colors active:scale-95 text-center whitespace-nowrap"
                 >
                   {delta > 0 ? `+${formatFraction(delta)}` : formatFraction(delta)}
                 </button>
@@ -136,13 +136,13 @@ export default function InputPanel({ params, onChange }) {
         </div>
 
         {/* Overlay Presets */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {[0.5, 0.75, 1.0, 1.5].map((ov) => (
             <button
               key={ov}
               type="button"
               onClick={() => handleOverlayAll(ov)}
-              className={`px-2 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border text-center truncate active:scale-95 ${
+              className={`flex-1 min-w-[4.5rem] px-2 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border text-center whitespace-nowrap active:scale-95 ${
                 isUniformOverlay && Number(params.overlayLeft) === ov
                   ? 'bg-amber-500 text-slate-950 border-amber-400 shadow'
                   : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
@@ -220,13 +220,13 @@ export default function InputPanel({ params, onChange }) {
 
           <div className="space-y-1">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Presets:</span>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="flex flex-wrap gap-1">
               {[1.5, 2.0, 2.5, 3.0].map((mw) => (
                 <button
                   key={mw}
                   type="button"
                   onClick={() => handleChange('materialWidth', mw)}
-                  className={`px-1 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all active:scale-95 text-center truncate ${
+                  className={`flex-1 min-w-[3.5rem] px-1 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all active:scale-95 text-center whitespace-nowrap ${
                     Number(params.materialWidth) === mw
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                       : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
