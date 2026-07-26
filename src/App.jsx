@@ -294,7 +294,9 @@ export default function App() {
                 onLoadParams={setFrameParams}
               />
             </div>
-          </div          {/* Right Column (Tabbed Outputs) */}
+          </div>
+
+          {/* Right Column (Tabbed Outputs) */}
           <div className="contents lg:block lg:col-span-7 space-y-4">
             
             {(!frameParams.openingWidth || !frameParams.openingHeight) ? (
@@ -389,8 +391,7 @@ export default function App() {
                 </div>
               </>
             )}
-          </div>iv>
-
+          </div>
         </div>
 
       </main>
