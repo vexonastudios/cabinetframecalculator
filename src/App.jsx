@@ -250,12 +250,14 @@ export default function App() {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white font-display">
-                Frame Size: <span className="text-amber-400">{calcResult.outerWidthFraction} W</span> × <span className="text-amber-400">{calcResult.outerHeightFraction} H</span>
+                Frame Size: <span className="text-amber-400">{(!frameParams.openingWidth || !frameParams.openingHeight) ? '--' : calcResult.outerWidthFraction + ' W'}</span> × <span className="text-amber-400">{(!frameParams.openingWidth || !frameParams.openingHeight) ? '--' : calcResult.outerHeightFraction + ' H'}</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                {frameParams.jointStyle === 'CONTINUOUS_RAILS' 
-                  ? `Top/Bottom continuous. Stiles cut at ${calcResult.cutList.find(c => c.id === 'outer-stiles')?.lengthFraction}.`
-                  : `Stiles continuous. Top/Bottom cut at ${calcResult.cutList.find(c => c.id === 'top-rail')?.lengthFraction}.`
+                {(!frameParams.openingWidth || !frameParams.openingHeight)
+                  ? 'Awaiting dimensions...'
+                  : frameParams.jointStyle === 'CONTINUOUS_RAILS' 
+                    ? `Top/Bottom continuous. Stiles cut at ${calcResult.cutList.find(c => c.id === 'outer-stiles')?.lengthFraction}.`
+                    : `Stiles continuous. Top/Bottom cut at ${calcResult.cutList.find(c => c.id === 'top-rail')?.lengthFraction}.`
                 }
               </p>
             </div>
@@ -292,91 +294,102 @@ export default function App() {
                 onLoadParams={setFrameParams}
               />
             </div>
-          </div>
-
-          {/* Right Column (Tabbed Outputs) */}
+          </div          {/* Right Column (Tabbed Outputs) */}
           <div className="contents lg:block lg:col-span-7 space-y-4">
             
-            {/* Tab Navigation */}
-            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-xl">
-              <button
-                onClick={() => setActiveTab('cutlist')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
-                  activeTab === 'cutlist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Scissors className="w-4 h-4" />
-                Cut List
-              </button>
-              <button
-                onClick={() => setActiveTab('diagram')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
-                  activeTab === 'diagram' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Layout className="w-4 h-4" />
-                Diagram
-              </button>
-              <button
-                onClick={() => setActiveTab('lumber')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
-                  activeTab === 'lumber' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                Lumber Map
-              </button>
-              <button
-                onClick={() => setActiveTab('joblist')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
-                  activeTab === 'joblist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                Job List
-                {batchList.length > 0 && (
-                  <span className="bg-amber-500 text-slate-900 px-1.5 py-0.5 rounded-full text-[10px] ml-1">
-                    {batchList.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="pt-2">
-              <div className={`${activeTab === 'cutlist' ? 'block' : 'hidden'} print:block print:mb-8`}>
-                <CutListTable
-                  calcResult={calcResult}
-                  onAddToMasterList={handleAddToMasterList}
-                />
+            {(!frameParams.openingWidth || !frameParams.openingHeight) ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
+                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700 shadow-inner">
+                  <Ruler className="w-8 h-8 text-amber-500" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 font-display">Let's Get Started</h3>
+                <p className="text-slate-400 max-w-sm text-sm">
+                  Enter your cabinet's <strong>Inner Opening Width</strong> and <strong>Height</strong> on the left to instantly generate your cut list, frame diagram, and lumber map.
+                </p>
               </div>
+            ) : (
+              <>
+                {/* Tab Navigation */}
+                <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-xl">
+                  <button
+                    onClick={() => setActiveTab('cutlist')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                      activeTab === 'cutlist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Scissors className="w-4 h-4" />
+                    Cut List
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('diagram')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                      activeTab === 'diagram' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Layout className="w-4 h-4" />
+                    Diagram
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('lumber')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                      activeTab === 'lumber' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Layers className="w-4 h-4" />
+                    Lumber Map
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('joblist')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex-1 justify-center sm:flex-none ${
+                      activeTab === 'joblist' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Job List
+                    {batchList.length > 0 && (
+                      <span className="bg-amber-500 text-slate-900 px-1.5 py-0.5 rounded-full text-[10px] ml-1">
+                        {batchList.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
 
-              <div className={`${activeTab === 'diagram' ? 'block' : 'hidden'} print:block print:mb-8`}>
-                <FrameDiagram
-                  calcResult={calcResult}
-                />
-              </div>
+                {/* Tab Content */}
+                <div className="pt-2">
+                  <div className={`${activeTab === 'cutlist' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                    <CutListTable
+                      calcResult={calcResult}
+                      onAddToMasterList={handleAddToMasterList}
+                    />
+                  </div>
 
-              <div className={`${activeTab === 'lumber' ? 'block' : 'hidden'} print:block print:mb-8`}>
-                <LumberOptimizer
-                  stockOptimization={activeStockOptimization}
-                  stockBoardLength={frameParams.stockBoardLength}
-                  onStockLengthChange={(len) => setFrameParams(p => ({ ...p, stockBoardLength: len }))}
-                  costPerBoard={shopSettings.costPerBoard}
-                />
-              </div>
+                  <div className={`${activeTab === 'diagram' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                    <FrameDiagram
+                      calcResult={calcResult}
+                    />
+                  </div>
 
-              <div className={`${activeTab === 'joblist' ? 'block' : 'hidden'}`}>
-                <MasterBatchList
-                  batchList={batchList}
-                  onToggleCheckItem={handleToggleCheckItem}
-                  onRemoveFrame={handleRemoveFrame}
-                  onClearBatch={handleClearBatch}
-                />
-              </div>
-            </div>
+                  <div className={`${activeTab === 'lumber' ? 'block' : 'hidden'} print:block print:mb-8`}>
+                    <LumberOptimizer
+                      stockOptimization={activeStockOptimization}
+                      stockBoardLength={frameParams.stockBoardLength}
+                      onStockLengthChange={(len) => setFrameParams(p => ({ ...p, stockBoardLength: len }))}
+                      costPerBoard={shopSettings.costPerBoard}
+                    />
+                  </div>
 
-          </div>
+                  <div className={`${activeTab === 'joblist' ? 'block' : 'hidden'}`}>
+                    <MasterBatchList
+                      batchList={batchList}
+                      onToggleCheckItem={handleToggleCheckItem}
+                      onRemoveFrame={handleRemoveFrame}
+                      onClearBatch={handleClearBatch}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>iv>
 
         </div>
 
